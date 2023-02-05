@@ -14,14 +14,19 @@ router.post("/Line", (req, res) => {
     machinenameprc +
     "_" +
     partname +
-    " WHERE Tanggal = '2022-04-06'";
+    " WHERE Tanggal = '2022-04-01'";
   console.log(sql);
   try {
     checklist.query(sql, (err, result) => {
       if (err) {
         console.log(err);
       } else {
-        console.log(err);
+        if (result.length === 0) {
+          res.status(500);
+          //console.log(result.length);
+        } else {
+          res.status(200);
+        }
         res.json({
           result,
         });
