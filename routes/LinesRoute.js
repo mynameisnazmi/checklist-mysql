@@ -9,12 +9,8 @@ router.post("/Line", (req, res) => {
   const { machinename, partname } = req.body;
   machinenameprc = machinename.toLowerCase();
   machinenameprc = machinenameprc.replace("-", "_");
-  const sql =
-    "SELECT * FROM " +
-    machinenameprc +
-    "_" +
-    partname +
-    " WHERE Tanggal = '2022-04-01'";
+  const sql = "SELECT * FROM " + machinenameprc + "_" + partname;
+
   console.log(sql);
   try {
     checklist.query(sql, (err, result) => {
