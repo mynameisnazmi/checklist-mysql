@@ -7,6 +7,7 @@ const router = Router();
 router.post("/line/", (req, res) => {
   let machinenameprc;
   const { machinename, partname, Tanggal, Nama } = req.body;
+  //console.log(machinename);
   machinenameprc = machinename.toLowerCase();
   machinenameprc = machinenameprc.replace("-", "_");
   const sql1 =
@@ -48,7 +49,7 @@ router.post("/line/", (req, res) => {
             }
             //berhasil menambah data
             else {
-              //console.log(result);
+              console.log(result);
               checklist.query(sql1, (err, result) => {
                 if (err) {
                   res.status(200);
@@ -65,6 +66,7 @@ router.post("/line/", (req, res) => {
         }
         //jika ada data
         else {
+          console.log(result);
           res.status(200);
           res.json({
             result,
