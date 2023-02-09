@@ -66,7 +66,7 @@ router.post("/line/", (req, res) => {
         }
         //jika ada data
         else {
-          console.log(result);
+          //console.log(result);
           res.status(200);
           res.json({
             result,
@@ -130,11 +130,11 @@ router.post("/line/update/", (req, res) => {
       if (err) {
         console.log(err);
       } else {
-        console.log(result);
+        //console.log(result);
         //console.log(err);
-        // res.json({
-        //   message: result.affectedRow + "record inserted",
-        // });
+        res.json({
+          message: result.affectedRows + "record inserted",
+        });
       }
     });
   } catch (error) {
