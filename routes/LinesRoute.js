@@ -3,21 +3,119 @@ const { checklist } = require("../config/Dbconnect.js");
 
 // Initialization
 const router = Router();
-
-router.post("/line/", (req, res) => {
+//select conveyer_arus..., FROM line_4_silo Where tanggal between A AND B
+// router.get('/p/:tagId', function(req, res) {
+//   res.send("tagId is set to " + req.params.tagId);
+// });
+router.get("/line/:machinename/:partname/:item/:from/:until", (req, res) => {
+  const { machinename, partname, item, from, until } = req.params;
   let machinenameprc;
-  const { machinename, partname, Tanggal, Nama } = req.body;
   //console.log(machinename);
   machinenameprc = machinename.toLowerCase();
   machinenameprc = machinenameprc.replace("-", "_");
+
+  let itmproprty = [
+    "_VDE_Vms",
+    "_VDE_Vge",
+    "_VDE_Hms",
+    "_VDE_Hge",
+    "_VNDE_Vms",
+    "_VNDE_Vge",
+    "_VNDE_Hms",
+    "_VNDE_Hge",
+    "_TempM",
+    "_ArusR",
+    "_ArusS",
+    "_ArusT",
+    "_Ket",
+  ];
+  let itmwithprpty = "";
+  itmproprty.map((data, index) => {
+    if (index + 1 === itmproprty.length) {
+      itmwithprpty += item + data;
+    } else {
+      itmwithprpty += item + data + ", ";
+    }
+  });
+  //console.log(itmwithprpty);
+
+  const sql1 =
+    "SELECT " +
+    itmwithprpty +
+    " FROM " +
+    machinenameprc +
+    "_" +
+    partname +
+    " WHERE Tanggal BETWEEN " +
+    "'" +
+    from +
+    "' AND " +
+    "'" +
+    until +
+    "'";
+  console.log(sql1);
+  try {
+    checklist.query(sql1, (err, result) => {
+      if (err) {
+        res.status(500);
+        console.log(err.errno);
+      } else {
+        //jika tidak ada data
+        if (result.length === 0) {
+          res.status(200);
+          res.json({
+            Failure: "No Data",
+          });
+        }
+        //jika ada data
+        else {
+          //console.log(result);
+          res.status(200);
+          res.json({
+            result,
+          });
+        }
+      }
+    });
+  } catch (error) {
+    res.status(200);
+    console.log(err.errno);
+  }
+});
+
+router.post("/line/", (req, res) => {
+  const { machinename, partname, Tanggal, Nama } = req.body;
+  const sunday = new Date(Tanggal);
+
+  let day1 = sunday.getDay(); //0-6
+  if (day1 !== 0) {
+    let day1sel = 6 - day1 + 1;
+    sunday.setDate(sunday.getDate() + day1sel);
+    //console.log(sunday);
+  } else {
+    sunday.setDate(sunday.getDate());
+    //console.log(sunday);
+  }
+  const monday = new Date(sunday);
+  monday.setDate(monday.getDate() - 6);
+  // console.log(monday);
+
+  let machinenameprc;
+  //console.log(machinename);
+  machinenameprc = machinename.toLowerCase();
+  machinenameprc = machinenameprc.replace("-", "_");
+
   const sql1 =
     "SELECT * FROM " +
     machinenameprc +
     "_" +
     partname +
-    " WHERE Tanggal = " +
+    " WHERE Tanggal BETWEEN " +
     "'" +
-    Tanggal +
+    monday.toISOString().slice(0, 10).replace("T", " ") +
+    "' AND " +
+    "'" +
+    sunday.toISOString().slice(0, 10).replace("T", " ") +
     "'";
   //'2022-10-10'";
 
@@ -32,19 +130,19 @@ router.post("/line/", (req, res) => {
     Tanggal +
     "')";
 
-  //console.log(sql1);
+  console.log(sql1);
 
   try {
     checklist.query(sql1, (err, result) => {
       if (err) {
-        res.status(200);
+        res.status(500);
         console.log(err.errno);
       } else {
         //jika tidak ada data
         if (result.length === 0) {
           checklist.query(sql2, (err, result) => {
             if (err) {
-              res.status(200);
+              res.status(500);
               console.log(err.errno);
             }
             //berhasil menambah data
@@ -52,7 +150,7 @@ router.post("/line/", (req, res) => {
               console.log(result);
               checklist.query(sql1, (err, result) => {
                 if (err) {
-                  res.status(200);
+                  res.status(500);
                   console.log(err.errno);
                 } else {
                   res.status(200);
