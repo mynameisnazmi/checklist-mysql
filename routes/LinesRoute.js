@@ -7,81 +7,111 @@ const router = Router();
 // router.get('/p/:tagId', function(req, res) {
 //   res.send("tagId is set to " + req.params.tagId);
 // });
-router.get("/line/:machinename/:partname/:item/:from/:until", (req, res) => {
-  const { machinename, partname, item, from, until } = req.params;
-  let machinenameprc;
-  //console.log(machinename);
-  machinenameprc = machinename.toLowerCase();
-  machinenameprc = machinenameprc.replace("-", "_");
+router.get(
+  "/line/" /*:machinename/:partname/:item/:from/:until*/,
+  (req, res) => {
+    const { machinename, partname, item, from, until } = req.query;
+    let machinenameprc;
+    //console.log(machinename);
+    machinenameprc = machinename.toLowerCase();
+    machinenameprc = machinenameprc.replace("-", "_");
+    let machinenameslc = machinenameprc.slice(0, 4);
 
-  let itmproprty = [
-    "_VDE_Vms",
-    "_VDE_Vge",
-    "_VDE_Hms",
-    "_VDE_Hge",
-    "_VNDE_Vms",
-    "_VNDE_Vge",
-    "_VNDE_Hms",
-    "_VNDE_Hge",
-    "_TempM",
-    "_ArusR",
-    "_ArusS",
-    "_ArusT",
-    "_Ket",
-  ];
-  let itmwithprpty = "";
-  itmproprty.map((data, index) => {
-    if (index + 1 === itmproprty.length) {
-      itmwithprpty += item + data;
+    let itmproprty = [
+      "_VDE_Vms",
+      "_VDE_Vge",
+      "_VDE_Hms",
+      "_VDE_Hge",
+      "_VNDE_Vms",
+      "_VNDE_Vge",
+      "_VNDE_Hms",
+      "_VNDE_Hge",
+      "_TempM",
+      "_ArusR",
+      "_ArusS",
+      "_ArusT",
+      "_Ket",
+    ];
+
+    let itmproprtyCT = [
+      //"_Vis",
+      //"_Stet",
+      "_ArusR",
+      "_ArusS",
+      "_ArusT",
+      "_VDE_Vms",
+      "_VDE_Vge",
+      "_VNDE_Vms",
+      "_VNDE_Vge",
+      "_TempM",
+      //"_Ket",
+    ];
+
+    let itmwithprpty = "";
+
+    if (machinenameslc === "coat" || machinenameslc === "metz") {
+      itmproprtyCT.map((data, index) => {
+        if (index + 1 === itmproprtyCT.length) {
+          itmwithprpty += item + data;
+        } else {
+          itmwithprpty += item + data + ", ";
+        }
+      });
     } else {
-      itmwithprpty += item + data + ", ";
+      itmproprty.map((data, index) => {
+        if (index + 1 === itmproprty.length) {
+          itmwithprpty += item + data;
+        } else {
+          itmwithprpty += item + data + ", ";
+        }
+      });
     }
-  });
-  //console.log(itmwithprpty);
+    //console.log(itmwithprpty);
 
-  const sql1 =
-    "SELECT " +
-    itmwithprpty +
-    " FROM " +
-    machinenameprc +
-    "_" +
-    partname +
-    " WHERE Tanggal BETWEEN " +
-    "'" +
-    from +
-    "' AND " +
-    "'" +
-    until +
-    "'";
-  console.log(sql1);
-  try {
-    checklist.query(sql1, (err, result) => {
-      if (err) {
-        res.status(500);
-        console.log(err.errno);
-      } else {
-        //jika tidak ada data
-        if (result.length === 0) {
-          res.status(200);
-          res.json({
-            Failure: "No Data",
-          });
+    const sql1 =
+      "SELECT Tanggal, " +
+      itmwithprpty +
+      " FROM " +
+      machinenameprc +
+      "_" +
+      partname +
+      " WHERE Tanggal BETWEEN " +
+      "'" +
+      from +
+      "' AND " +
+      "'" +
+      until +
+      "'";
+    console.log(sql1);
+    try {
+      checklist.query(sql1, (err, result) => {
+        if (err) {
+          res.status(500);
+          console.log(err.errno);
+        } else {
+          //jika tidak ada data
+          if (result.length === 0) {
+            res.status(200);
+            res.json({
+              Failure: "No Data",
+            });
+          }
+          //jika ada data
+          else {
+            //console.log(result);
+            res.status(200);
+            res.json({
+              result,
+            });
+          }
         }
-        //jika ada data
-        else {
-          //console.log(result);
-          res.status(200);
-          res.json({
-            result,
-          });
-        }
-      }
-    });
-  } catch (error) {
-    res.status(200);
-    console.log(err.errno);
+      });
+    } catch (error) {
+      res.status(200);
+      console.log(err.errno);
+    }
   }
-});
+);
 
 router.post("/line/", (req, res) => {
   const { machinename, partname, Tanggal, Nama } = req.body;
