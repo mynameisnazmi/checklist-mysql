@@ -23,6 +23,58 @@ router.post("/auth", (req, res) => {
   });
 });
 
+router.post("/register", (req, res) => {
+  const { nik, nama, department, typeuser, password } = req.body;
+  const pasmd = md5(password);
+  const sqlcek = "SELECT ID FROM user WHERE ID = '" + nik + "'";
+  const sql =
+    "INSERT INTO user (ID,departemen,first_name,typeUser,email,pass) VALUES ('" +
+    nik +
+    "','" +
+    department +
+    "','" +
+    nama +
+    "','" +
+    typeuser +
+    "','" +
+    nik +
+    "','" +
+    pasmd +
+    "')";
+  //console.log(sqlcek);
+  try {
+    user.query(sqlcek, (err, result) => {
+      if (err) {
+        res.status(500);
+        console.log(err.errno);
+      } else {
+        //jika tidak ada data
+        if (result.length === 0) {
+          user.query(sql, (err, result) => {
+            if (err) throw err;
+            console.log(result);
+            responseformat(200, "", "Success", res);
+          });
+        }
+        //jika ada data
+        else {
+          responseformat(202, result, "User Already Created", res);
+        }
+      }
+    });
+  } catch (error) {
+    res.status(200);
+    console.log(error.errno);
+  }
+});
+
+router.get("/test", (req, res) => {
+   res.status(200);
+            res.json({
+              Failure: "No Data",
+            });
+});
+
 //router.post("/register", UsersController.addUser);
 //router.delete("/delete/:nik", UsersController.deleteUser);
 

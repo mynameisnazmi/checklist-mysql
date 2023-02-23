@@ -108,7 +108,7 @@ router.get(
       });
     } catch (error) {
       res.status(200);
-      console.log(err.errno);
+      console.log(error.errno);
     }
   }
 );
